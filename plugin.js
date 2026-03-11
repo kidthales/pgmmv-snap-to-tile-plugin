@@ -44,27 +44,17 @@
           window.kt = {};
         }
 
-        // TODO
         window.kt.snapToTile = {
-          snapToTile: undefined,
-          snapToTileHorizontal: undefined,
-          snapToTileVertical: undefined
+          snapToTile: snapToTile,
+          snapToTileHorizontal: snapToTileHorizontal,
+          snapToTileVertical: snapToTileVertical
         };
       },
       finalize: function () {},
       setParamValue: function () {},
       setInternal: function () {},
       call: function () {},
-      execActionCommand: function (
-        actionCommandIndex,
-        parameter,
-        objectId,
-        instanceId,
-        actionId,
-        commandId,
-        commonActionStatus,
-        sceneId
-      ) {
+      execActionCommand: function (actionCommandIndex, parameter, objectId, instanceId) {
         /** @type {import("pgmmv-types/lib/agtk/plugins/plugin").AgtkActionCommand} */
         var actionCommand = plugin.getInfo('actionCommand')[actionCommandIndex],
           /** @type {Record<number,import("type-fest").JsonValue>} */
@@ -72,8 +62,20 @@
 
         switch (actionCommand.id) {
           case snapToTileActionCommand.id:
+            return snapToTile(
+              np[actionCommand.parameter[0].id],
+              np[actionCommand.parameter[1].id],
+              np[actionCommand.parameter[2].id],
+              instanceId
+            );
           case snapToTileHorizontalActionCommand.id:
+            return snapToTileHorizontal(
+              np[actionCommand.parameter[0].id],
+              np[actionCommand.parameter[1].id],
+              instanceId
+            );
           case snapToTileVerticalActionCommand.id:
+            return snapToTileVertical(np[actionCommand.parameter[0].id], np[actionCommand.parameter[1].id], instanceId);
           default:
             break;
         }
@@ -160,6 +162,147 @@
           defaultValue: -1
         }
       ]
+    },
+    /**
+     * @param variableObjectId {
+     *   import("pgmmv-types/lib/agtk/constants/switch-variable-objects").AgtkSwitchVariableObjects['ProjectCommon'] |
+     *   import("pgmmv-types/lib/agtk/constants/switch-variable-objects").AgtkSwitchVariableObjects['SelfObject'] |
+     *   import("pgmmv-types/lib/agtk/constants/switch-variable-objects").AgtkSwitchVariableObjects['ParentObject']
+     * }
+     * @param originXVariableId {number}
+     * @param originYVariableId {number}
+     * @param instanceId {number}
+     * @returns {import("pgmmv-types/lib/agtk/constants/action-commands/command-behavior").AgtkCommandBehavior['CommandBehaviorNext']}
+     */
+    snapToTile = function (variableObjectId, originXVariableId, originYVariableId, instanceId) {
+      var projectCommon = Agtk.constants.switchVariableObjects.ProjectCommon,
+        source = resolveSwitchVariableObject(variableObjectId, instanceId),
+        /**
+         * @type {
+         *   import("pgmmv-types/lib/agtk/variables/variable").AgtkVariable |
+         *   import("pgmmv-types/lib/agtk/object-instances/object-instance/variables/variable").AgtkVariable
+         * }
+         */
+        originXVariable,
+        /**
+         * @type {
+         *   import("pgmmv-types/lib/agtk/variables/variable").AgtkVariable |
+         *   import("pgmmv-types/lib/agtk/object-instances/object-instance/variables/variable").AgtkVariable
+         * }
+         */
+        originYVariable,
+        /** @type {number} */
+        originX,
+        /** @type {number} */
+        originY,
+        objectInstance = Agtk.objectInstances.get(instanceId),
+        xVariable = objectInstance.variables.get(Agtk.constants.objects.variables.XId),
+        yVariable = objectInstance.variables.get(Agtk.constants.objects.variables.YId),
+        tileWidth = Agtk.settings.tileWidth,
+        tileHeight = Agtk.settings.tileHeight;
+
+      if (source === Agtk.constants.actionCommands.UnsetObject) {
+        originX = originY = 0.5;
+      } else {
+        if (originXVariableId < 1) {
+          originX = 0.5;
+        }
+
+        if (originYVariableId < 1) {
+          originY = 0.5;
+        }
+      }
+
+      if (originX === undefined) {
+        originXVariable = (source === projectCommon ? Agtk : source).variables.get(originXVariableId);
+        originX = !originXVariable ? 0.5 : cc.clampf(originXVariable.getValue(), 0, 1);
+      }
+
+      if (originY === undefined) {
+        originYVariable = (source === projectCommon ? Agtk : source).variables.get(originYVariableId);
+        originY = !originYVariable ? 0.5 : cc.clampf(originYVariable.getValue(), 0, 1);
+      }
+
+      xVariable.setValue(Math.floor(xVariable.getValue() / tileWidth) * tileWidth + originX * tileWidth);
+      yVariable.setValue(Math.floor(yVariable.getValue() / tileHeight) * tileHeight + originY * tileHeight);
+
+      return Agtk.constants.actionCommands.commandBehavior.CommandBehaviorNext;
+    },
+    /**
+     * @param variableObjectId {
+     *   import("pgmmv-types/lib/agtk/constants/switch-variable-objects").AgtkSwitchVariableObjects['ProjectCommon'] |
+     *   import("pgmmv-types/lib/agtk/constants/switch-variable-objects").AgtkSwitchVariableObjects['SelfObject'] |
+     *   import("pgmmv-types/lib/agtk/constants/switch-variable-objects").AgtkSwitchVariableObjects['ParentObject']
+     * }
+     * @param originXVariableId {number}
+     * @param instanceId {number}
+     * @returns {import("pgmmv-types/lib/agtk/constants/action-commands/command-behavior").AgtkCommandBehavior['CommandBehaviorNext']}
+     */
+    snapToTileHorizontal = function (variableObjectId, originXVariableId, instanceId) {
+      var source = resolveSwitchVariableObject(variableObjectId, instanceId),
+        /**
+         * @type {
+         *   import("pgmmv-types/lib/agtk/variables/variable").AgtkVariable |
+         *   import("pgmmv-types/lib/agtk/object-instances/object-instance/variables/variable").AgtkVariable
+         * }
+         */
+        originXVariable,
+        /** @type {number} */
+        originX,
+        objectInstance = Agtk.objectInstances.get(instanceId),
+        xVariable = objectInstance.variables.get(Agtk.constants.objects.variables.XId),
+        tileWidth = Agtk.settings.tileWidth;
+
+      if (source === Agtk.constants.actionCommands.UnsetObject || originXVariableId < 1) {
+        originX = 0.5;
+      } else {
+        originXVariable = (source === Agtk.constants.switchVariableObjects.ProjectCommon ? Agtk : source).variables.get(
+          originXVariableId
+        );
+        originX = !originXVariable ? 0.5 : cc.clampf(originXVariable.getValue(), 0, 1);
+      }
+
+      xVariable.setValue(Math.floor(xVariable.getValue() / tileWidth) * tileWidth + originX * tileWidth);
+
+      return Agtk.constants.actionCommands.commandBehavior.CommandBehaviorNext;
+    },
+    /**
+     * @param variableObjectId {
+     *   import("pgmmv-types/lib/agtk/constants/switch-variable-objects").AgtkSwitchVariableObjects['ProjectCommon'] |
+     *   import("pgmmv-types/lib/agtk/constants/switch-variable-objects").AgtkSwitchVariableObjects['SelfObject'] |
+     *   import("pgmmv-types/lib/agtk/constants/switch-variable-objects").AgtkSwitchVariableObjects['ParentObject']
+     * }
+     * @param originYVariableId {number}
+     * @param instanceId {number}
+     * @returns {import("pgmmv-types/lib/agtk/constants/action-commands/command-behavior").AgtkCommandBehavior['CommandBehaviorNext']}
+     */
+    snapToTileVertical = function (variableObjectId, originYVariableId, instanceId) {
+      var source = resolveSwitchVariableObject(variableObjectId, instanceId),
+        /**
+         * @type {
+         *   import("pgmmv-types/lib/agtk/variables/variable").AgtkVariable |
+         *   import("pgmmv-types/lib/agtk/object-instances/object-instance/variables/variable").AgtkVariable
+         * }
+         */
+        originYVariable,
+        /** @type {number} */
+        originY,
+        objectInstance = Agtk.objectInstances.get(instanceId),
+        yVariable = objectInstance.variables.get(Agtk.constants.objects.variables.YId),
+        tileHeight = Agtk.settings.tileHeight;
+
+      if (source === Agtk.constants.actionCommands.UnsetObject || originYVariableId < 1) {
+        originY = 0.5;
+      } else {
+        originYVariable = (source === Agtk.constants.switchVariableObjects.ProjectCommon ? Agtk : source).variables.get(
+          originYVariableId
+        );
+        originY = !originYVariable ? 0.5 : cc.clampf(originYVariable.getValue(), 0, 1);
+      }
+
+      yVariable.setValue(Math.floor(yVariable.getValue() / tileHeight) * tileHeight + originY * tileHeight);
+
+      return Agtk.constants.actionCommands.commandBehavior.CommandBehaviorNext;
     },
     /**
      * @returns {boolean}
