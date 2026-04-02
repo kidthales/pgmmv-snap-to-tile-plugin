@@ -1,7 +1,7 @@
 {
   "name": "@kidthales/pgmmv-snap-to-tile-plugin",
   "version": "0.1.1",
-  "description": "A snap-to-tile plugin for PGMMV.",
+  "description": "Position PGMMV objects within their current tile.",
   "license": "MIT",
   "private": true,
   "scripts": {

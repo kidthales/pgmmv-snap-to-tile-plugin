@@ -18,11 +18,20 @@
           case 'name':
             return 'PGMMV Snap-To-Tile Plugin';
           case 'description':
-            return 'Snap-to-tile action commands.';
+            return 'Position objects within their current tile.';
           case 'author':
             return 'Tristan Bonsor <kidthales@agogpixel.com>';
           case 'help':
-            return '';
+            return (
+              'This plugin provides a way to position an object with its current tile, relative\n' +
+              "to the tile's top or left. Suitable for use with platformer-style ladder tiles,\n" +
+              'overview-style grid movement, or any other use case that requires object\n' +
+              'positioning within a tile.\n' +
+              '\n' +
+              'Object position within a tile is expressed as a value between 0 (left or top)\n' +
+              'and 1 (right or bottom). Separate action commands are provided for 2-axis and\n' +
+              'single-axis positioning.'
+            );
           case 'parameter':
             return [];
           case 'internal':
@@ -92,14 +101,14 @@
       parameter: [
         {
           id: 100,
-          name: 'Variable Source:',
+          name: 'Variable Source',
           type: 'SwitchVariableObjectId',
           option: ['SelfObject', 'ParentObject'],
           defaultValue: -1
         },
         {
           id: 0,
-          name: 'Origin X:',
+          name: 'Origin X',
           type: 'VariableId',
           referenceId: 100,
           withNewButton: true,
@@ -107,7 +116,7 @@
         },
         {
           id: 1,
-          name: 'Origin Y:',
+          name: 'Origin Y',
           type: 'VariableId',
           referenceId: 100,
           withNewButton: true,
@@ -124,14 +133,14 @@
       parameter: [
         {
           id: 100,
-          name: 'Variable Source:',
+          name: 'Variable Source',
           type: 'SwitchVariableObjectId',
           option: ['SelfObject', 'ParentObject'],
           defaultValue: -1
         },
         {
           id: 0,
-          name: 'Origin X:',
+          name: 'Origin X',
           type: 'VariableId',
           referenceId: 100,
           withNewButton: true,
@@ -148,14 +157,14 @@
       parameter: [
         {
           id: 100,
-          name: 'Variable Source:',
+          name: 'Variable Source',
           type: 'SwitchVariableObjectId',
           option: ['SelfObject', 'ParentObject'],
           defaultValue: -1
         },
         {
           id: 0,
-          name: 'Origin Y:',
+          name: 'Origin Y',
           type: 'VariableId',
           referenceId: 100,
           withNewButton: true,
