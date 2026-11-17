@@ -5,7 +5,7 @@
  * @license {@link https://opensource.org/licenses/MIT MIT License}
  * @version 0.2.0
  */
-/// <reference path="./node_modules/@kidthales/pgmmv-types/pgmmv.d.ts" />
+/// <reference types="@kidthales/pgmmv-types/pgmmv.d.ts" />
 // noinspection ES6ConvertVarToLetConst
 (function () {
   /**

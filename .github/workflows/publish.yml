@@ -33,6 +33,15 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts
 
+      - name: Validate release tag
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$ ]]; then
+            echo "Invalid release tag: $RELEASE_TAG" >&2
+            exit 1
+          fi
+
       - name: Build plugin
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name }}
@@ -42,4 +51,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
-        run: gh release upload "$RELEASE_TAG" "dist/pgmmv-snap-to-tile-plugin-${RELEASE_TAG}.js" --clobber
+        run: gh release upload --clobber -- "$RELEASE_TAG" "dist/pgmmv-snap-to-tile-plugin-${RELEASE_TAG}.js"
